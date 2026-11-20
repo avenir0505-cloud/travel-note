@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 여행 노트</title>
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#2e2a26;--sub:#8a8178;--line:#ece6dd;--accent:#c8693f;--soft:#f6e6dc;--ok:#5b8a6a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a18;--card:#262320;--ink:#f1ece6;--sub:#a39a90;--line:#38332e;--accent:#e08a5f;--soft:#3a2c24;--ok:#7fb08e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1a18;--card:#262320;--ink:#f1ece6;--sub:#a39a90;--line:#38332e;--accent:#e08a5f;--soft:#3a2c24;--ok:#7fb08e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding:16px 16px 160px}
+h1{font-size:20px;margin:4px 0 12px}
+.row{display:flex;gap:8px;align-items:center}
+select,input,textarea,button{font:inherit;color:inherit}
+select,input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 12px}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+button.sm{padding:6px 10px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--accent);margin:0 6px 6px 0}
+.big{font-size:18px;font-weight:700}
+.sub{color:var(--sub);font-size:13px}
+#tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px}
+#tabs button{white-space:nowrap;text-align:center;line-height:1.3}
+#tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+ul{list-style:none;margin:0;padding:0}
+li.it{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
+li.it.done .nm{text-decoration:line-through;color:var(--sub)}
+.tm{min-width:46px;font-size:13px;color:var(--sub);padding-top:2px}
+.nm{font-weight:600}
+.acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.acts a{font-size:13px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+.empty{text-align:center;color:var(--sub);padding:28px 8px;border:1px dashed var(--line);border-radius:14px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));padding:13px 22px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+dialog{border:none;border-radius:18px;padding:18px;width:min(92vw,420px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+.chk{appearance:none;-webkit-appearance:none;display:grid;place-content:center;flex:none;width:24px;height:24px;margin:1px 0 0;padding:0;border:2px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;transition:.15s}
+.chk::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;margin-top:-2px;transform:rotate(45deg) scale(0);transition:.15s}
+.chk:checked{background:var(--accent);border-color:var(--accent)}
+.chk:checked::after{transform:rotate(45deg) scale(1)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--sub);margin:6px 6px 0 0}
+.tag.good{color:var(--ok);border-color:var(--ok)}
+.tag.warn{color:var(--accent);border-color:var(--accent)}
+.tp{position:relative;display:flex;justify-content:center;align-items:center;gap:6px;height:240px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;transition:opacity .15s}
+.tp.off{opacity:.4}
+.tpband{position:absolute;left:10px;right:10px;top:96px;height:48px;border-radius:10px;background:var(--soft)}
+.tpcol{position:relative;z-index:1;height:240px;width:96px;overflow-y:auto;padding:96px 0;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.tpcol::-webkit-scrollbar{display:none}
+.tpcol div{height:48px;line-height:48px;text-align:center;font-size:26px;color:var(--sub);scroll-snap-align:center;scroll-snap-stop:always}
+.tpcol div.on{color:var(--ink);font-weight:700}
+.tpsep{position:relative;z-index:1;font-size:26px;font-weight:700}
+.ntl{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px}
+
+.pr{border:1px solid var(--line);border-radius:10px;padding:10px;margin:6px 0;cursor:pointer}
+.pr a{font-size:13px;color:var(--accent)}
+.seg{display:flex;gap:8px;margin:0 0 12px}
+.seg button{flex:1}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ph{display:flex;gap:6px;overflow-x:auto;margin-top:6px}
+.ph img{width:64px;height:64px;object-fit:cover;border-radius:8px;cursor:pointer;flex:none}
+button{white-space:nowrap}
+.row>button{flex:none}
+.back{border:none;background:none;padding:6px 2px;margin-bottom:4px;color:var(--accent);font-size:15px}
+li.trip{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0;cursor:pointer}
+.chip{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--sub)}
+.chip.ovs,.chip.again{color:var(--accent);border-color:var(--accent);background:var(--soft)}
+.chip.dom{color:var(--ok);border-color:var(--ok)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chipb{padding:8px 14px;border-radius:99px;font-size:14px}
+.chipb.on{background:var(--soft);border-color:var(--accent);color:var(--accent)}
+.rvl{display:flex;align-items:center;gap:8px;margin-top:6px}
+.stars{color:var(--accent);letter-spacing:1px;font-size:14px}
+.sl{max-height:250px;overflow-y:auto}
+.pr.sel{border-color:var(--accent);background:var(--soft)}
+.rh{display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px}
+.mrow{display:flex;gap:8px;margin-top:8px}
+.mrow>*{flex:1;margin-top:0}
+button.more{background:var(--card);font:inherit;font-size:14px;cursor:pointer}
+.seg{display:none}
+#auth{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.ap{max-width:420px;margin:0 auto;padding:16px 20px 40px}
+.full{width:100%;padding:13px;margin-top:14px;font-size:16px}
+.pri:disabled{opacity:.4;cursor:default}
+.err{color:#c0392b;font-size:13px;min-height:18px;margin-top:6px}
+.demo{background:var(--soft);color:var(--accent);border-radius:10px;padding:8px 12px;font-size:13px;margin:4px 0 12px}
+.note{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:8px}
+.links{display:flex;justify-content:space-between;margin-top:12px}
+.lk{border:none;background:none;color:var(--sub);font-size:14px;padding:4px 0}
+.or{text-align:center;color:var(--sub);font-size:13px;margin:18px 0 6px}
+.soc{width:100%;padding:13px;margin-top:8px;border:none;font-size:15px;font-weight:600;border-radius:12px}
+.kakao{background:#FEE500;color:#191919}
+.naver{background:#03C75A;color:#fff}
+.rules{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.rule{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--sub);white-space:nowrap}
+.rule.ok{color:var(--ok);border-color:var(--ok)}
+.av{width:44px;height:44px;border-radius:50%;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-weight:700;flex:none}
+#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+#tabbar button{flex:1;max-width:112px;border:none;background:none;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;font-size:11px;color:var(--sub)}
+#tabbar i{font-style:normal;font-size:20px}
+#tabbar button.on{color:var(--accent);font-weight:700}
+.chip.live{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.menu{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:12px 0}
+.mi{display:flex;align-items:center;gap:12px;width:100%;padding:16px;border:none;border-bottom:1px solid var(--line);border-radius:0;background:none;text-align:left;font-size:15px}
+.mi:last-child{border-bottom:none}
+.mi .ar{margin-left:auto;color:var(--sub)}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;padding:0;border:none;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:.15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+.sw:checked{background:var(--accent)}
+.sw:checked::after{left:21px}
+.more{display:block;text-align:center;white-space:nowrap;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;color:var(--accent);text-decoration:none;font-size:14px}
+.addph{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:10px 16px;margin:8px 0 0;border:1px dashed var(--accent);border-radius:12px;background:var(--soft);color:var(--accent);font-size:14px;cursor:pointer}
+.ph img:not([src]){background:var(--soft)}
+#syncMsg{min-height:0}
+#syncMsg:empty{display:none}
+.exp b{font-weight:700}
+</style>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+<main>
+  <div id="home">
+  <h1 id="hT">🧳 내 여행</h1>
+  <div id="joinRow" class="row" style="margin-bottom:8px"><button class="sm" onclick="askJoin()">🔑 공유 코드로 참여</button></div>
+  <div class="seg"><button id="vPlan" class="on" onclick="setView('plan')">일정</button><button id="vSeen" onclick="setView('seen')">가본 곳</button></div>
+  <ul id="trips"></ul>
+  <div id="seen" style="display:none"><input id="seenQ" placeholder="가본 곳 검색 (이름·메뉴·후기)" oninput="renderSeen()"><ul id="seenList"></ul></div>
+  </div>
+  <div id="detail" style="display:none">
+  <button class="back" onclick="goHome()">← 여행 목록</button>
+  <div class="card" id="sum"></div>
+  <div id="tabs"></div>
+  <div id="syncMsg" class="sub" style="margin:0 0 8px"></div>
+  <ul id="list"></ul>
+  <div id="exp"></div>
+  </div>
+<section id="tHome" style="display:none"></section>
+  <section id="tFav" style="display:none"><h1>⭐ 즐겨찾기</h1><div class="empty">마음에 드는 장소를 모아 보는 화면이에요.<br>다음 단계에서 일정과 연결할게요.</div></section>
+  <section id="tMy" style="display:none"></section>
+</main>
+<nav id="tabbar">
+<button data-t="home" onclick="goTab('home')"><i>🏠</i>홈</button>
+<button data-t="trips" onclick="goTab('trips')"><i>🧳</i>여행</button>
+<button data-t="rec" onclick="goTab('rec')"><i>📖</i>기록</button>
+<button data-t="fav" onclick="goTab('fav')"><i>⭐</i>즐겨찾기</button>
+<button data-t="my" onclick="goTab('my')"><i>👤</i>MY</button>
+</nav>
+<div id="auth" style="display:none"><div class="ap">
+  <button class="back" onclick="authClose()">← 돌아가기</button>
+  <div class="demo">화면 설계용 프로토타입이에요. 실제 가입·로그인·메일 발송은 서버 연결 후 동작해요.</div>
+  <section id="pLogin"><h1>로그인</h1>
+    <div id="nLogin" class="note" style="display:none">메일로 받은 임시 비밀번호로 로그인해 주세요. 로그인 후 비밀번호를 바꿔 주세요.</div>
+    <label>이메일</label><input id="lEmail" type="email" inputmode="email" autocomplete="username" placeholder="name@example.com">
+    <label>비밀번호</label><input id="lPw" type="password" autocomplete="current-password">
+    <div class="err" id="eLogin"></div>
+    <button class="pri full" onclick="doLogin()">로그인</button>
+    <div class="links"><button class="lk" onclick="authShow('forgot')">비밀번호 찾기</button><button class="lk" onclick="authShow('signup')">이메일로 가입</button></div>
+    <div class="or">또는</div>
+    <button class="soc kakao" onclick="social('카카오')">카카오로 계속하기</button>
+    <button class="soc naver" onclick="social('네이버')">네이버로 계속하기</button>
+  </section>
+  <section id="pSignup" style="display:none"><h1>회원가입</h1>
+    <button class="soc kakao" onclick="social('카카오')">카카오로 시작하기</button>
+    <button class="soc naver" onclick="social('네이버')">네이버로 시작하기</button>
+    <div class="or">또는 이메일로 가입</div>
+    <label>이메일</label><input id="suEmail" type="email" inputmode="email" autocomplete="username" oninput="checkSignup()" placeholder="name@example.com">
+    <label>비밀번호</label><input id="suPw" type="password" autocomplete="new-password" oninput="checkSignup()" placeholder="영문+숫자 8~20자">
+    <div class="rules" id="pwRules"><span class="rule" data-k="eng">영문 포함</span><span class="rule" data-k="num">숫자 포함</span><span class="rule" data-k="len">8~20자</span><span class="rule" data-k="only">영문·숫자만</span></div>
+    <label>비밀번호 확인</label><input id="suPw2" type="password" autocomplete="new-password" oninput="checkSignup()">
+    <label class="ntl"><input type="checkbox" class="chk" id="suAgree" onchange="checkSignup()"> 이용약관·개인정보 처리방침에 동의해요 (필수)</label>
+    <div class="err" id="eSignup"></div>
+    <button class="pri full" id="suBtn" disabled onclick="doSignup()">가입하기</button>
+    <div class="links"><span></span><button class="lk" onclick="authShow('login')">이미 계정이 있어요</button></div>
+  </section>
+  <section id="pForgot" style="display:none"><h1>비밀번호 찾기</h1>
+    <div class="sub">가입한 이메일로 임시 비밀번호를 보내드려요.</div>
+    <label>이메일</label><input id="fEmail" type="email" inputmode="email" placeholder="name@example.com">
+    <div class="err" id="eForgot"></div>
+    <button class="pri full" onclick="doForgot()">임시 비밀번호 발송</button>
+    <div class="links"><span></span><button class="lk" onclick="authShow('login')">로그인으로 돌아가기</button></div>
+  </section>
+  <section id="pSent" style="display:none"><h1>발송 완료</h1>
+    <div class="card"><div class="nm" id="sentTo"></div><div class="sub" style="margin-top:6px">위 이메일로 임시 비밀번호를 보냈어요. 메일을 확인하고 임시 비밀번호로 로그인해 주세요.</div></div>
+    <button class="pri full" onclick="authShow('login',true)">임시 비밀번호로 로그인</button>
+  </section>
+</div></div>
+<button id="fabTrip" class="fab pri" onclick="openTrip()">+ 새 여행 등록</button>
+<button id="fab" class="fab pri" style="display:none" onclick="openItem()">+ 일정 추가</button>
+
+<dialog id="dItem">
+  <div class="big" id="dItemT">일정</div>
+  <div id="sBox" style="display:none"><label>장소 검색</label><div class="row"><input id="sQ" placeholder="예: 텐진 라멘집, 하카타 쇼핑" onkeydown="if(event.key==='Enter')searchPlace()"><button class="sm" id="sBtn" onclick="searchPlace()">검색</button></div><div id="sRes"></div></div>
+  <label>시간</label>
+  <div class="row"><select id="iH" onchange="timeChg()"></select><select id="iM"></select></div>
+  
+  <label>종류</label><select id="iCat" onchange="soloToggle()"></select>
+  <label>장소 / 내용</label><input id="iName" placeholder="예: 텐진 지하상가">
+  <label>링크 (선택)</label><input id="iLink" inputmode="url" placeholder="https://  지도·예약·블로그 링크">
+  <div id="soloBox"><label>혼자 입장</label><select id="iSolo"><option value="">미확인</option><option value="ok">가능</option><option value="limit">시간대 제한</option><option value="no">불가</option></select>
+  <div class="row"><div style="flex:1"><label>좌석</label><select id="iSeat"><option value="">미확인</option><option value="bar">바·카운터석</option><option value="single">1인석</option><option value="table">테이블석</option></select></div>
+  <div style="flex:1"><label>1인 메뉴</label><select id="iMenu"><option value="">미확인</option><option value="yes">있음</option><option value="no">없음</option></select></div></div></div>
+  <label>메모</label><textarea id="iMemo" rows="3" placeholder="예약 여부, 영업시간, 먹고 싶은 메뉴 등"></textarea>
+  <div class="row" style="margin-top:16px">
+    <button id="iDel" class="sm" onclick="delItem(this)">삭제</button>
+    <span style="flex:1"></span>
+    <button onclick="dItem.close()">취소</button>
+    <button class="pri" onclick="saveItem()">저장</button>
+  </div>
+</dialog>
+
+<dialog id="dRec">
+  <div class="big" id="rT">후기</div>
+  <label>별점</label><div id="rStars" class="row"></div>
+  <label>먹은 메뉴 / 산 것</label><input id="rMenu">
+  <label>후기</label><textarea id="rNote" rows="3" placeholder="맛, 분위기, 다음에 또 시킬 것 등"></textarea>
+  <label>또 갈래?</label><div class="chips" id="rRevC"><button type="button" class="chipb" data-v="again" onclick="setRev('again')">🔄 또 갈래</button><button type="button" class="chipb" data-v="once" onclick="setRev('once')">👌 한 번이면 충분</button></div>
+  <div id="rPhBox"><label>사진</label><div class="ph" id="rPh"></div><label class="addph" for="rFile">📷 사진 추가</label><input id="rFile" type="file" accept="image/*" multiple hidden onchange="addPhotos(this)"><div class="sub" id="rMsg"></div></div>
+  <div class="row" style="margin-top:16px"><span style="flex:1"></span><button onclick="dRec.close()">취소</button><button class="pri" onclick="saveRec()">저장</button></div>
+</dialog>
+<div id="zoom" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;align-items:center;justify-content:center"><img id="zimg" style="max-width:96%;max-height:92%"></div>
+
+<dialog id="dJoin">
+  <div class="big">공유 코드로 참여</div>
+  <div class="sub">일행이 알려준 공유 코드를 입력하세요.</div>
+  <label>공유 코드</label><input id="jCode" placeholder="예: K7M2QX9P4A" autocapitalize="characters" autocomplete="off">
+  <div class="err" id="jErr"></div>
+  <div class="row" style="margin-top:16px"><span style="flex:1"></span><button onclick="dJoin.close()">취소</button><button class="pri" id="jBtn" onclick="doJoin()">참여</button></div>
+</dialog>
+
+<dialog id="dExp">
+  <div class="big" id="eT">지출 추가</div>
+  <label>날짜</label><input id="eDate" type="date">
+  <label>항목</label><input id="eName" placeholder="예: 점심 라멘, 택시">
+  <div class="row"><div style="flex:2"><label>금액</label><input id="eAmt" type="number" inputmode="decimal" min="0" placeholder="0"></div><div style="flex:1"><label>통화</label><select id="eCur"><option>₩</option><option>¥</option><option>$</option><option>€</option></select></div></div>
+  <label>낸 사람</label><input id="ePayer" maxlength="10" placeholder="이름">
+  <div class="row" style="margin-top:16px"><button id="eDel" class="sm" onclick="delExp(this)">삭제</button><span style="flex:1"></span><button onclick="dExp.close()">취소</button><button class="pri" onclick="saveExp()">저장</button></div>
+</dialog>
+
+<dialog id="dMenu"><div class="big" id="mT"></div><div id="mB"></div><div class="row" style="margin-top:16px"><span style="flex:1"></span><button class="pri" onclick="dMenu.close()">닫기</button></div></dialog>
+
+<dialog id="dTrip">
+  <div class="big" id="dTripT">여행</div>
+  <label>여행 이름</label><input id="tName" placeholder="예: 후쿠오카">
+  <label>여행지</label><input id="tDest" placeholder="예: 일본 후쿠오카">
+  <label>구분</label><div class="chips" id="tTypeC"><button type="button" class="chipb" data-v="overseas" onclick="setType('overseas')">✈️ 해외</button><button type="button" class="chipb" data-v="domestic" onclick="setType('domestic')">🏠 국내</button></div>
+  
+  
+  <div class="row">
+    <div style="flex:1"><label>시작일</label><input id="tStart" type="date"></div>
+    <div style="flex:1"><label>종료일</label><input id="tEnd" type="date"></div>
+  </div>
+  
+  <div class="sub" style="margin-top:12px">여행 데이터는 일행과 공유돼요. '목록에서 제거'는 이 기기에서만 지우고, 일행에게는 그대로 남아요.</div>
+  <div class="row" style="margin-top:12px">
+    <button id="tDel" class="sm" onclick="delTrip(this)">목록에서 제거</button>
+    <span style="flex:1"></span>
+    <button onclick="dTrip.close()">취소</button>
+    <button class="pri" onclick="saveTrip()">저장</button>
+  </div>
+</dialog>
+
+<script>
+const CATS={shop:['🛍️','쇼핑'],food:['🍜','맛집'],cafe:['☕','카페'],move:['🚃','이동'],stay:['🏨','숙소'],etc:['✨','기타']};
+const KEY='trip-app-fb1', WD=['일','월','화','수','목','금','토'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+let S=load(), editItem=null, editTrip=null;
+
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);(d.trips||[]).forEach(t=>{t.items=t.items||[];t.expenses=t.expenses||[]});d.trips=d.trips||[];return d}}catch(e){}
+  return {cur:'',day:'',trips:[]};
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+}
+const trip=()=>S.trips.find(t=>t.id===S.cur)||S.trips[0];
+function days(t){
+  const out=[];let d=new Date(t.start+'T00:00:00');const e=new Date(t.end+'T00:00:00');
+  while(d<=e&&out.length<60){out.push(d.toISOString?fmtISO(d):'');d.setDate(d.getDate()+1)}
+  return out;
+}
+function fmtISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dlabel(s){const d=new Date(s+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate()+' ('+WD[d.getDay()]+')'}
+
+function render(){
+  renderHome();renderHomeTab();const t=trip();if(!t){S.trips=[];$('sum').innerHTML='<div class="empty">여행을 추가해 주세요.</div>';$('tabs').innerHTML='';$('list').innerHTML='';return}
+  const ds=days(t);if(!ds.includes(S.day))S.day=ds[0];
+  
+  const done=t.items.filter(i=>i.done).length;
+  $('sum').innerHTML='<div class="row"><div style="flex:1"><div class="big">'+esc(t.name)+'</div>'
+    +'<div class="sub">'+esc(t.dest)+' · '+dlabel(t.start)+' ~ '+dlabel(t.end)+'</div></div>'
+    +'<button class="sm" onclick="openTrip(\''+t.id+'\')">수정</button></div>'
+    
+    
+    +'<div class="sub" style="margin-top:8px">일정 '+t.items.length+'개 · 다녀옴 '+done+'개</div>'+shareHtml(t);
+  $('tabs').innerHTML=ds.map((d,i)=>'<button class="'+(d===S.day?'on':'')+'" onclick="setDay(\''+d+'\')">'+(i+1)+'일차 · '+dlabel(d)+'</button>').join('');
+  const items=t.items.filter(i=>i.day===S.day).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  $('list').innerHTML=items.length?items.map(i=>{
+    const c=CATS[i.cat]||CATS.etc;
+    const q=encodeURIComponent(i.name+' '+t.dest);
+    return '<li class="it'+(i.done?' done':'')+'"><input class="chk" type="checkbox" '+(i.done?'checked':'')+' onchange="toggle(\''+i.id+'\')" aria-label="다녀옴">'
+      +'<div class="tm">'+esc(i.time||'--:--')+'</div><div style="flex:1;min-width:0"><div class="nm">'+c[0]+' '+esc(i.name)+'</div>'
+      +(i.memo?'<div class="sub">'+esc(i.memo)+'</div>':'')+soloTags(i)+recHtml(i,t.id)
+      +'<div class="acts"><a href="https://www.google.com/maps/search/?api=1&query='+q+'" target="_blank" rel="noopener">지도</a>'+(i.link?'<a href="'+esc(i.link)+'" target="_blank" rel="noopener">링크</a>':'')
+      +'<button class="sm" onclick="openItem(\''+i.id+'\')">수정</button><button class="sm" onclick="openRec(\''+i.id+'\')">'+(i.rec?'후기 수정':'후기')+'</button></div></div></li>';
+  }).join(''):'<div class="empty">아직 일정이 없어요.<br>가고 싶은 쇼핑·맛집 리스트를 채워 보세요.</div>';renderExp(t);renderSeen();
+  save();
+}
+function pick(id){S.cur=id;S.day='';render()}
+function setDay(d){S.day=d;render()}
+function toggle(id){const t=trip(),i=t.items.find(x=>x.id===id);if(i){i.done=!i.done;render();syncSet(t.id,{['items.'+id+'.done']:i.done})}}
+
+function openItem(id){
+  const t=trip();if(!t)return;
+  $('iCat').innerHTML=Object.keys(CATS).map(k=>'<option value="'+k+'">'+CATS[k][0]+' '+CATS[k][1]+'</option>').join('');
+  const i=id?t.items.find(x=>x.id===id):null;editItem=i?i.id:null;
+  $('dItemT').textContent=i?'일정 수정 · '+dlabel(i.day):'일정 추가 · '+dlabel(S.day);
+  $('iCat').value=i?i.cat:'food';$('iName').value=i?i.name:'';$('iMemo').value=i?i.memo:'';$('iLink').value=(i&&i.link)||'';$('iSolo').value=(i&&i.solo)||'';$('iSeat').value=(i&&i.seat)||'';$('iMenu').value=(i&&i.menu)||'';soloToggle();
+  $('iDel').style.display=i?'':'none';resetDel($('iDel'));
+  $('dItem').showModal();$('sQ').value='';$('sRes').innerHTML='';setTimePick(i?i.time:'');requestAnimationFrame(()=>setTimePick(i?i.time:''));
+}
+function saveItem(){
+  const name=$('iName').value.trim();if(!name){$('iName').focus();return}
+  const t=trip();
+  let it;
+  if(editItem){let i=t.items.find(x=>x.id===editItem);if(!i){i={id:editItem,day:S.day,done:false};t.items.push(i)}it=i;Object.assign(i,{time:getTime(),cat:$('iCat').value,name,memo:$('iMemo').value.trim(),solo:$('iSolo').value,seat:$('iSeat').value,menu:$('iMenu').value,link:normLink($('iLink').value)})}
+  else{it={id:'i'+uid(),day:S.day,time:getTime(),cat:$('iCat').value,name,memo:$('iMemo').value.trim(),solo:$('iSolo').value,seat:$('iSeat').value,menu:$('iMenu').value,link:normLink($('iLink').value),done:false};t.items.push(it)}
+  $('dItem').close();render();syncSet(t.id,{['items.'+it.id]:clean(it)});
+}
+function arm(btn,fn,msg){
+  if(btn.dataset.arm){fn();return}
+  btn.dataset.arm='1';btn.textContent=msg||'정말 삭제';btn.style.color='#c0392b';
+}
+function resetDel(btn,txt){delete btn.dataset.arm;btn.textContent=txt||'삭제';btn.style.color=''}
+const pad=n=>String(n).padStart(2,'0');
+function noTime(v){$('iNoTime').checked=v;$('tp').classList.toggle('off',v)}
+function buildTP(){
+  const mk=(id,vals)=>{const c=$(id);
+    c.innerHTML=vals.map(v=>'<div data-v="'+v+'">'+pad(v)+'</div>').join('');
+    c.addEventListener('scroll',()=>{const k=Math.round(c.scrollTop/48);[...c.children].forEach((e,j)=>e.classList.toggle('on',j===k))});
+    ['pointerdown','wheel','touchstart'].forEach(ev=>c.addEventListener(ev,()=>noTime(false),{passive:true}));
+    c.addEventListener('click',e=>{const d=e.target.closest('[data-v]');if(d){noTime(false);c.scrollTo({top:[...c.children].indexOf(d)*48,behavior:'smooth'})}})};
+  mk('tpH',[...Array(24).keys()]);
+  mk('tpM',[...Array(12).keys()].map(n=>n*5));
+}
+function pv(id){const c=$(id);return +c.children[Math.max(0,Math.min(c.children.length-1,Math.round(c.scrollTop/48)))].dataset.v}
+function getTime0(){return $('iNoTime').checked?'':pad(pv('tpH'))+':'+pad(pv('tpM'))}
+function setTimePick0(t){
+  const ok=/^\d{2}:\d{2}$/.test(t||'');let h=12,m=0;
+  if(ok){h=+t.slice(0,2);m=Math.round(+t.slice(3)/5)*5;if(m===60){m=0;h=(h+1)%24}}
+  noTime(!ok);$('tpH').scrollTop=h*48;$('tpM').scrollTop=m/5*48;
+}
+let SAMPLE=null,SR=[];
+
+async function searchPlace0(){
+  const q=$('sQ').value.trim();if(!q||!SAMPLE)return;
+  const t=trip(),b=$('sBtn');b.disabled=true;b.textContent='검색 중…';$('sRes').innerHTML='';
+  try{
+    const r=await SAMPLE.json('여행지: '+t.dest+'\n검색어: '+q+'\n위 여행지에서 검색어에 맞고 실제로 존재하며 널리 알려진 식당·상점·장소를 최대 6개 골라, JSON 배열로만 답하세요. 각 항목은 name(상호 또는 장소명), area(동네), cat(shop, food, cafe, stay, etc 중 하나), desc(한국어 한 줄 설명, 40자 이내) 키를 가진 객체입니다. 확실하지 않으면 제외하고, 영업시간·가격·예약 가능 여부는 쓰지 마세요.',{modelTier:'quick'});
+    SR=(Array.isArray(r)?r:[]).filter(p=>p&&p.name).slice(0,6);
+    $('sRes').innerHTML=SR.length?SR.map((p,i)=>'<div class="pr" onclick="usePlace('+i+')"><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc([p.area,p.desc].filter(Boolean).join(' · '))+'</div><a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.name+' '+t.dest)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">지도에서 확인</a></div>').join('')+'<div class="sub">Claude가 제안한 후보예요. 영업 여부와 위치는 지도에서 꼭 확인해 주세요.</div>':'<div class="sub">결과가 없어요. 검색어를 바꿔 보세요.</div>';
+  }catch(e){$('sRes').innerHTML='<div class="sub">'+(e&&e.code==='not_granted'?'검색을 쓰려면 허용이 필요해요.':'검색에 실패했어요. 잠시 후 다시 시도해 주세요.')+'</div>'}
+  b.disabled=false;b.textContent='검색';
+}
+function usePlace0(i){const p=SR[i];if(!p)return;$('iName').value=p.name;if(CATS[p.cat])$('iCat').value=p.cat;if(!$('iMemo').value.trim())$('iMemo').value=[p.area,p.desc].filter(Boolean).join(' · ');soloToggle();$('sRes').innerHTML=''}
+const normLink=s=>{s=(s||'').trim();return s&&!/^https?:\/\//i.test(s)?'https://'+s:s};
+function buildTimeSel(){
+  $('iH').innerHTML='<option value="">시간 미정</option>'+[...Array(24).keys()].map(h=>'<option value="'+pad(h)+'">'+pad(h)+'시</option>').join('');
+  $('iM').innerHTML=[...Array(12).keys()].map(n=>'<option value="'+pad(n*5)+'">'+pad(n*5)+'분</option>').join('');
+  timeChg();
+}
+function timeChg(){$('iM').disabled=$('iH').value===''}
+function getTime(){return $('iH').value===''?'':$('iH').value+':'+$('iM').value}
+function setTimePick(t){
+  const ok=/^\d{2}:\d{2}$/.test(t||'');let h='',m='00';
+  if(ok){let hh=+t.slice(0,2),mm=Math.round(+t.slice(3)/5)*5;if(mm===60){mm=0;hh=(hh+1)%24}h=pad(hh);m=pad(mm)}
+  $('iH').value=h;$('iM').value=m;timeChg();
+}
+async function searchPlace(){
+  const q=$('sQ').value.trim();if(!q||!SAMPLE)return;
+  const t=trip(),b=$('sBtn');b.disabled=true;b.textContent='검색 중…';$('sRes').innerHTML='';
+  const more='<div class="mrow"><button class="more" onclick="manualAdd()">직접입력</button><a class="more" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)+'" target="_blank" rel="noopener">검색결과 더보기</a></div>';
+  try{
+    const r=await SAMPLE.json('검색어: '+q+'\n참고 여행지: '+t.dest+'\n검색어에 지역 이름(한국 포함 어느 나라든)이 들어 있으면 그 지역을 기준으로, 없으면 참고 여행지 주변을 기준으로 찾으세요. 검색어와 관련도가 높은 순서대로, 실제로 존재하고 널리 알려진 식당·상점·카페·장소를 최대 10개 골라 JSON 배열로만 답하세요. 각 항목은 name(상호 또는 장소명), area(동네), cat(shop, food, cafe, stay, etc 중 하나), desc(한국어 한 줄 설명, 40자 이내) 키를 가진 객체입니다. 확실하지 않으면 제외하고, 영업시간·가격·예약 가능 여부는 쓰지 마세요.',{modelTier:'quick'});
+    SR=(Array.isArray(r)?r:[]).filter(p=>p&&p.name).slice(0,10);
+    showRes(SR.length?'<div class="sl">'+SR.map((p,i)=>'<div class="pr" onclick="usePlace('+i+')"><div class="nm">'+esc(p.name)+'</div><div class="sub">'+esc([p.area,p.desc].filter(Boolean).join(' · '))+'</div><a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.name+' '+(p.area||''))+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">지도에서 확인</a></div>').join('')+'</div><div class="sub">Claude가 제안한 후보예요. 영업 여부와 위치는 지도에서 꼭 확인해 주세요.</div>'+more:'<div class="sub">검색 결과가 없어요. 직접입력을 눌러 등록해 보세요.</div>'+more);
+  }catch(e){showRes('<div class="sub">'+(e&&e.code==='not_granted'?'검색을 쓰려면 허용이 필요해요.':'검색에 실패했어요. 직접 입력하거나 지도에서 찾아보세요.')+'</div>'+more)}
+  b.disabled=false;b.textContent='검색';
+}
+function showRes(h){$('sRes').innerHTML='<div class="rh"><span class="sub">검색 결과</span><button class="sm" onclick="closeRes()">닫기</button></div>'+h}
+function closeRes(){$('sRes').innerHTML=''}
+function manualAdd(){
+  $('iName').value=$('sQ').value.trim();$('iMemo').value='';$('iLink').value='';
+  $('iSolo').value='';$('iSeat').value='';$('iMenu').value='';
+  SR=[];closeRes();soloToggle();$('iName').focus();$('iName').select();
+}
+function usePlace(i){
+  const p=SR[i];if(!p)return;
+  $('iName').value=p.name;if(CATS[p.cat])$('iCat').value=p.cat;
+  $('iMemo').value=[p.area,p.desc].filter(Boolean).join(' · ');
+  $('iLink').value='';$('iSolo').value='';$('iSeat').value='';$('iMenu').value='';
+  soloToggle();document.querySelectorAll('#sRes .pr').forEach((e,k)=>e.classList.toggle('sel',k===i));
+}
+buildTimeSel();
+let SCR='home',LT='trips',RRV='',TT='overseas';
+const RV={again:['🔄','또 갈래','again'],once:['👌','한 번이면 충분','once']};
+const ymd=s=>String(s||'').replace(/-/g,'.');
+function layout0(){
+  const d=SCR==='trip';
+  $('home').style.display=d?'none':'';$('detail').style.display=d?'':'none';
+  $('fab').style.display=d?'':'none';$('fabTrip').style.display=(!d&&LT==='trips')?'':'none';
+  $('trips').style.display=LT==='trips'?'':'none';$('seen').style.display=LT==='seen'?'':'none';
+  $('vPlan').classList.toggle('on',LT==='trips');$('vSeen').classList.toggle('on',LT==='seen');
+}
+function setView(v){LT=v==='seen'?'seen':'trips';layout();if(LT==='seen')renderSeen()}
+function openDetail(id){S.cur=id;S.day='';SCR='trip';layout();render();window.scrollTo(0,0)}
+function goHome(){SCR='home';layout();window.scrollTo(0,0)}
+function renderHome(){
+  const L=S.trips.slice().sort((a,b)=>(b.start||'').localeCompare(a.start||''));
+  $('trips').innerHTML=L.length?L.map(t=>'<li class="trip" onclick="openDetail(\''+t.id+'\')"><div style="flex:1;min-width:0"><div class="nm">'+esc(t.name)+'</div>'+(t.dest&&t.dest!==t.name?'<div class="sub">'+esc(t.dest)+'</div>':'')+'<div class="sub">'+ymd(t.start)+' ~ '+ymd(t.end)+'</div></div>'+(t.type?'<span class="chip '+(t.type==='domestic'?'dom':'ovs')+'">'+(t.type==='domestic'?'🏠 국내':'✈️ 해외')+'</span>':'')+'<span class="sub">›</span></li>').join(''):'<div class="empty">아직 등록된 여행이 없어요.<br>아래 버튼으로 새 여행을 등록해 보세요.</div>';
+}
+function setType(v){TT=v;document.querySelectorAll('#tTypeC button').forEach(b=>b.classList.toggle('on',b.dataset.v===v))}
+function setRev(v){RRV=RRV===v?'':v;paintRev()}
+function paintRev(){document.querySelectorAll('#rRevC button').forEach(b=>b.classList.toggle('on',b.dataset.v===RRV))}
+let TAB='home',AUTH='';
+const PW=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,EM=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function getUser(){try{return JSON.parse(localStorage.getItem('trip-demo-user')||'null')}catch(e){return null}}
+function setUser(u){try{u?localStorage.setItem('trip-demo-user',JSON.stringify(u)):localStorage.removeItem('trip-demo-user')}catch(e){}}
+function layout(){
+  const m=TAB==='trips'||TAB==='rec',d=TAB==='trips'&&SCR==='trip',sh=(id,on)=>{$(id).style.display=on?'':'none'};
+  sh('home',m&&!d);sh('detail',d);sh('trips',TAB==='trips');sh('seen',TAB==='rec');
+  sh('tHome',TAB==='home');sh('tFav',TAB==='fav');sh('tMy',TAB==='my');
+  sh('fab',d);sh('fabTrip',TAB==='trips'&&!d);sh('joinRow',TAB==='trips'&&!d);sh('auth',!!AUTH);sh('tabbar',!AUTH);
+  $('hT').textContent=TAB==='rec'?'📖 기록':'🧳 내 여행';
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB));
+  ['login','signup','forgot','sent'].forEach(p=>sh('p'+p[0].toUpperCase()+p.slice(1),p===AUTH));
+}
+function goTab(t){TAB=t;if(t==='trips')SCR='home';AUTH='';layout();renderHomeTab();renderMy();window.scrollTo(0,0)}
+function goTrip(id){TAB='trips';openDetail(id)}
+function renderHomeTab0(){
+  const u=getUser(),td=fmtISO(new Date());
+  const up=S.trips.filter(t=>t.end>=td).sort((a,b)=>a.start.localeCompare(b.start))[0];
+  const seen=S.trips.reduce((n,t)=>n+t.items.filter(i=>i.done||i.rec).length,0);
+  let h='<h1>'+(u?esc(u.label)+'님, 안녕하세요 👋':'안녕하세요 👋')+'</h1>';
+  if(up){const dd=Math.round((new Date(up.start+'T00:00:00')-new Date(td+'T00:00:00'))/864e5);
+    h+='<div class="card" onclick="goTrip(\''+up.id+'\')" style="cursor:pointer"><div class="sub">다가오는 여행</div><div class="big">'+esc(up.name)+'</div><div class="sub">'+ymd(up.start)+' ~ '+ymd(up.end)+'</div><div style="margin-top:8px"><span class="chip ovs">'+(dd>0?'D-'+dd:dd===0?'D-DAY':'여행 중')+'</span></div></div>'}
+  else h+='<div class="empty">예정된 여행이 없어요.<br>여행 탭에서 새 여행을 등록해 보세요.</div>';
+  h+='<div class="card"><div class="row" style="justify-content:space-around"><div style="text-align:center"><div class="big">'+S.trips.length+'</div><div class="sub">등록한 여행</div></div><div style="text-align:center"><div class="big">'+seen+'</div><div class="sub">가본 곳</div></div></div></div>';
+  $('tHome').innerHTML=h;
+}
+function renderMy0(){
+  const u=getUser();
+  $('tMy').innerHTML='<h1>MY</h1><div class="card">'+(u?'<div class="row"><div class="av">'+esc(u.label.slice(0,1))+'</div><div style="flex:1;min-width:0"><div class="nm">'+esc(u.label)+'</div><div class="sub">'+esc(u.via)+' 계정 (프로토타입)</div></div><button class="sm" onclick="logout()">로그아웃</button></div>':'<div class="nm">로그인하고 여행을 보관하세요</div><div class="sub">프로토타입 화면라 실제 계정은 만들어지지 않아요.</div><div class="row" style="margin-top:12px"><button class="pri" style="flex:1" onclick="authShow(\'login\')">로그인</button><button style="flex:1" onclick="authShow(\'signup\')">회원가입</button></div>')+'</div>';
+}
+function authShow(p,tmp){AUTH=p;['eLogin','eSignup','eForgot'].forEach(i=>$(i).textContent='');$('nLogin').style.display=tmp?'':'none';layout();window.scrollTo(0,0);if(p==='signup')checkSignup()}
+function authClose(){AUTH='';layout()}
+function enter(u){setUser(u);AUTH='';TAB='my';layout();renderMy();renderHomeTab()}
+function social(n){enter({label:n+' 사용자',via:n})}
+function doLogin(){
+  const e=$('lEmail').value.trim(),p=$('lPw').value;
+  if(!EM.test(e)){$('eLogin').textContent='이메일 형식을 확인해 주세요.';return}
+  if(!p){$('eLogin').textContent='비밀번호를 입력해 주세요.';return}
+  enter({label:e.split('@')[0],via:'이메일'});
+}
+function checkSignup(){
+  const e=$('suEmail').value.trim(),p=$('suPw').value,c=$('suPw2').value;
+  const r={len:p.length>=8&&p.length<=20,eng:/[A-Za-z]/.test(p),num:/\d/.test(p),only:/^[A-Za-z\d]+$/.test(p)};
+  document.querySelectorAll('#pwRules .rule').forEach(x=>x.classList.toggle('ok',p!==''&&!!r[x.dataset.k]));
+  $('suBtn').disabled=!(EM.test(e)&&PW.test(p)&&p===c&&$('suAgree').checked);
+  $('eSignup').textContent=c&&p!==c?'비밀번호가 일치하지 않아요.':(e&&!EM.test(e)?'이메일 형식을 확인해 주세요.':'');
+}
+function doSignup(){if($('suBtn').disabled)return;enter({label:$('suEmail').value.trim().split('@')[0],via:'이메일'})}
+function doForgot(){
+  const e=$('fEmail').value.trim();
+  if(!EM.test(e)){$('eForgot').textContent='이메일 형식을 확인해 주세요.';return}
+  $('sentTo').textContent=e;authShow('sent');
+}
+function logout(){setUser(null);renderMy();renderHomeTab()}
+function prefs(){try{return JSON.parse(localStorage.getItem('trip-pref')||'{}')}catch(e){return {}}}
+function setPref(k,v){const p=prefs();p[k]=v;try{localStorage.setItem('trip-pref',JSON.stringify(p))}catch(e){}if(k==='theme')applyTheme()}
+function applyTheme(){const t=prefs().theme;if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
+function renderHomeTab(){
+  const u=getUser(),now=new Date(),td=fmtISO(now),a=new Date(now),b=new Date(now);
+  a.setMonth(a.getMonth()-1);b.setMonth(b.getMonth()+1);
+  const lo=fmtISO(a),hi=fmtISO(b),L=S.trips.filter(t=>t.end>=lo&&t.start<=hi);
+  const rk=t=>t.start<=td&&t.end>=td?0:t.start>td?1:2;
+  L.sort((x,y)=>rk(x)-rk(y)||(rk(x)===2?y.end.localeCompare(x.end):x.start.localeCompare(y.start)));
+  const seen=S.trips.reduce((n,t)=>n+t.items.filter(i=>i.done||i.rec).length,0);
+  let h='<h1>'+(u?esc(u.label)+'님, 안녕하세요 👋':'안녕하세요 👋')+'</h1><div class="sub" style="margin-bottom:4px">오늘 기준 한 달 전 ~ 한 달 후 여행</div>';
+  h+=L.length?L.map(t=>{
+    const k=rk(t),dd=Math.round((new Date(t.start+'T00:00:00')-new Date(td+'T00:00:00'))/864e5);
+    const chip=k===0?'<span class="chip live">● 진행중</span>':k===1?'<span class="chip ovs">D-'+dd+'</span>':'<span class="chip">종료</span>';
+    return '<div class="card" onclick="goTrip(\''+t.id+'\')" style="cursor:pointer"><div class="row"><div style="flex:1;min-width:0"><div class="big">'+esc(t.name)+'</div><div class="sub">'+ymd(t.start)+' ~ '+ymd(t.end)+'</div></div>'+chip+'</div></div>'}).join(''):'<div class="empty">한 달 전후로 예정된 여행이 없어요.<br>여행 탭에서 새 여행을 등록해 보세요.</div>';
+  h+='<div class="card"><div class="row" style="justify-content:space-around"><div style="text-align:center"><div class="big">'+S.trips.length+'</div><div class="sub">등록한 여행</div></div><div style="text-align:center"><div class="big">'+seen+'</div><div class="sub">가본 곳</div></div></div></div>';
+  $('tHome').innerHTML=h;
+}
+function renderMy(){
+  renderMy0();
+  if(getUser())$('tMy').insertAdjacentHTML('beforeend','<div class="menu">'+[['account','👤','계정 설정'],['notify','🔔','알림 설정'],['app','⚙️','앱 설정'],['legal','📄','개인정보 처리방침 및 약관']].map(m=>'<button class="mi" onclick="openMenu(\''+m[0]+'\')"><span>'+m[1]+'</span>'+m[2]+'<span class="ar">›</span></button>').join('')+'</div>');
+}
+function openMenu(k){
+  const u=getUser()||{label:'',via:''},p=prefs();let t='',b='';
+  if(k==='account'){t='계정 설정';b='<label>로그인 방식</label><div class="nm">'+esc(u.via)+'</div><label>이름</label><div class="nm">'+esc(u.label)+'</div><div class="sub" style="margin-top:12px">비밀번호 변경과 회원 탈퇴는 서버 연결 후 제공돼요.</div>'}
+  else if(k==='notify'){t='알림 설정';b=[['n1','여행 D-day 알림',p.n1!==false],['n2','일정 시작 알림',p.n2!==false],['n3','후기 작성 알림',p.n3===true]].map(x=>'<div class="srow"><span>'+x[1]+'</span><input class="sw" type="checkbox" '+(x[2]?'checked':'')+' onchange="setPref(\''+x[0]+'\',this.checked)"></div>').join('')+'<div class="sub" style="margin-top:12px">실제 알림 발송은 앱 출시 후 동작해요.</div>'}
+  else if(k==='app'){const th=p.theme||'';t='앱 설정';b='<label>화면 테마</label><div class="chips">'+[['','시스템'],['light','라이트'],['dark','다크']].map(x=>'<button class="chipb'+(th===x[0]?' on':'')+'" onclick="setPref(\'theme\',\''+x[0]+'\');openMenu(\'app\')">'+x[1]+'</button>').join('')+'</div><div class="sub" style="margin-top:12px">버전 프로토타입</div>'}
+  else{t='개인정보 처리방침 및 약관';b='<div class="sub">개인정보 처리방침과 이용약관은 정식 공개 전에 작성해 이곳에 연결할 예정이에요.</div>'}
+  $('mT').textContent=t;$('mB').innerHTML=b;if(!$('dMenu').open)$('dMenu').showModal();
+}
+applyTheme();
+let db=null,F=null,REC=null,RP=[],RR=0,UNSUB={},PH={},PHL={};
+let READY_OK;const READY=new Promise(r=>{READY_OK=r});
+const cfg=(typeof firebaseConfig!=='undefined')?firebaseConfig:null;
+const clean=o=>JSON.parse(JSON.stringify(o));
+const DEL=()=>F.deleteField();
+const CODE_CH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){const a=new Uint32Array(10);crypto.getRandomValues(a);return [...a].map(n=>CODE_CH[n%CODE_CH.length]).join('')}
+let syncT=null;
+function setSync(m,ms){const e=$('syncMsg');if(!e)return;e.textContent=m||'';clearTimeout(syncT);if(ms)syncT=setTimeout(()=>{e.textContent=''},ms)}
+function fromDoc(code,d){
+  const arr=o=>Object.values(o||{}).filter(Boolean);
+  return {id:code,code,name:d.name||'',dest:d.dest||'',type:d.type||'',start:d.start||'',end:d.end||'',items:arr(d.items),expenses:arr(d.expenses)};
+}
+function applyDoc(code,d){
+  const n=fromDoc(code,d),i=S.trips.findIndex(t=>t.id===code);
+  if(i>=0)S.trips[i]=n;else S.trips.push(n);
+  if(!S.cur)S.cur=code;
+  render();
+}
+function subscribe(code){
+  if(!db||UNSUB[code])return;
+  UNSUB[code]=F.onSnapshot(F.doc(db,'trips',code),snap=>{if(snap.exists())applyDoc(code,snap.data())},err=>setSync('동기화 오류: '+(err.code||err.message)));
+}
+async function syncSet(code,fields){
+  const t=S.trips.find(x=>x.id===code);if(!t||!t.code)return;
+  await READY;if(!db)return;
+  try{await F.updateDoc(F.doc(db,'trips',code),fields);setSync('')}
+  catch(e){setSync('저장 실패: '+(e.code||e.message))}
+}
+async function initDb(){
+  if(!cfg||!cfg.apiKey||String(cfg.apiKey).startsWith('YOUR_')){setSync('firebase-config.js 설정 전이라 이 기기에만 저장돼요.');READY_OK();return}
+  try{
+    const V='10.12.2';
+    const [A,FS]=await Promise.all([import('https://www.gstatic.com/firebasejs/'+V+'/firebase-app.js'),import('https://www.gstatic.com/firebasejs/'+V+'/firebase-firestore.js')]);
+    db=FS.getFirestore(A.initializeApp(cfg));F=FS;
+    setSync('');
+    S.trips.filter(t=>t.code).forEach(t=>subscribe(t.code));
+    const p=new URLSearchParams(location.search).get('trip');
+    if(p){try{history.replaceState(null,'',location.pathname)}catch(e){}const e=await joinTrip(p);if(e)alert(e)}
+  }catch(e){setSync('Firebase 연결 실패: '+e.message)}
+  READY_OK();
+}
+async function joinTrip(raw){
+  const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==10)return '공유 코드는 영문·숫자 10자리예요.';
+  if(!db)return '아직 연결되지 않았어요. 잠시 후 다시 시도해 주세요.';
+  try{
+    const snap=await F.getDoc(F.doc(db,'trips',code));
+    if(!snap.exists())return '해당 코드의 여행을 찾을 수 없어요.';
+    applyDoc(code,snap.data());subscribe(code);goTrip(code);return '';
+  }catch(e){return '불러오지 못했어요: '+(e.code||e.message)}
+}
+function askJoin(){$('jCode').value='';$('jErr').textContent='';$('dJoin').showModal()}
+async function doJoin(){
+  const b=$('jBtn');b.disabled=true;$('jErr').textContent='';
+  await READY;
+  const e=await joinTrip($('jCode').value);
+  b.disabled=false;
+  if(e){$('jErr').textContent=e;return}
+  $('dJoin').close();
+}
+function copyText(s,msg){
+  (navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>setSync(msg,2500)).catch(()=>prompt('복사해서 공유하세요',s));
+}
+function copyCode(){const t=trip();if(t&&t.code)copyText(t.code,'공유 코드를 복사했어요.')}
+function copyLink(){const t=trip();if(t&&t.code)copyText(location.origin+location.pathname+'?trip='+t.code,'공유 링크를 복사했어요.')}
+function shareHtml(t){
+  if(!t.code)return '<div class="sub" style="margin-top:8px">이 기기에만 저장된 여행이에요.</div>';
+  return '<div class="row" style="margin-top:10px"><div style="flex:1;min-width:0"><div class="sub">공유 코드</div><div class="nm" style="letter-spacing:2px">'+esc(t.code)+'</div></div><button class="sm" onclick="copyCode()">코드 복사</button><button class="sm" onclick="copyLink()">링크 복사</button></div>';
+}
+function hydrate(){
+  document.querySelectorAll('img[data-pid]').forEach(im=>{
+    if(im.getAttribute('src'))return;
+    const c=im.dataset.c,p=im.dataset.pid,k=c+'/'+p;
+    if(PH[k]){im.src=PH[k];return}
+    if(!db||PHL[k])return;PHL[k]=1;
+    F.getDoc(F.doc(db,'trips',c,'photos',p)).then(s=>{
+      if(!s.exists())return;PH[k]=s.data().data;
+      document.querySelectorAll('img[data-pid="'+p+'"]').forEach(x=>{if(!x.getAttribute('src'))x.src=PH[k]});
+    }).catch(()=>{delete PHL[k]});
+  });
+}
+/* ---------- 지출 ---------- */
+let editExp=null;
+const fmtM=(n,c)=>c+(Math.round(n*100)/100).toLocaleString('ko-KR');
+function nick(){try{return localStorage.getItem('trip-nick')||''}catch(e){return ''}}
+function lastCur(){try{return localStorage.getItem('trip-cur')||'₩'}catch(e){return '₩'}}
+function renderExp(t){
+  const E=(t.expenses||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.ts||0)-(a.ts||0));
+  const tot={},by={};
+  E.forEach(e=>{const c=e.cur||'₩',p=e.payer||'미지정',a=+e.amt||0;tot[c]=(tot[c]||0)+a;by[p]=by[p]||{};by[p][c]=(by[p][c]||0)+a});
+  const fm=o=>Object.keys(o).map(c=>fmtM(o[c],c)).join(' + ');
+  let h='<div class="card exp"><div class="rh"><div class="big">💰 지출</div><button class="sm pri" onclick="openExp()">+ 지출 추가</button></div>';
+  if(!E.length)h+='<div class="sub">아직 지출 기록이 없어요.</div>';
+  else{
+    h+='<div class="sub">합계 <b>'+fm(tot)+'</b></div>'+Object.keys(by).map(p=>'<div class="sub">· '+esc(p)+' '+fm(by[p])+'</div>').join('');
+    h+=E.map(e=>'<div class="srow"><div style="min-width:0"><div class="nm">'+esc(e.name)+'</div><div class="sub">'+(e.date?dlabel(e.date)+' · ':'')+esc(e.payer||'미지정')+'</div></div><div style="text-align:right;flex:none"><b>'+fmtM(+e.amt||0,e.cur||'₩')+'</b> <button class="sm" onclick="openExp(\''+e.id+'\')">수정</button></div></div>').join('');
+  }
+  $('exp').innerHTML=h+'</div>';
+}
+function openExp(id){
+  const t=trip();if(!t)return;
+  const e=id?(t.expenses||[]).find(x=>x.id===id):null;editExp=e?e.id:null;
+  $('eT').textContent=e?'지출 수정':'지출 추가';
+  $('eDate').value=e?e.date:(S.day||t.start);$('eName').value=e?e.name:'';$('eAmt').value=e?e.amt:'';
+  $('eCur').value=e?(e.cur||'₩'):lastCur();$('ePayer').value=e?(e.payer||''):nick();
+  $('eDel').style.display=e?'':'none';resetDel($('eDel'));$('dExp').showModal();
+}
+function saveExp(){
+  const t=trip(),name=$('eName').value.trim(),amt=parseFloat($('eAmt').value);
+  if(!name){$('eName').focus();return}
+  if(isNaN(amt)||amt<0){$('eAmt').focus();return}
+  const o={id:editExp||'x'+uid(),date:$('eDate').value,name,amt,cur:$('eCur').value,payer:$('ePayer').value.trim(),ts:Date.now()};
+  try{localStorage.setItem('trip-nick',o.payer);localStorage.setItem('trip-cur',o.cur)}catch(e){}
+  t.expenses=t.expenses||[];
+  const i=t.expenses.findIndex(x=>x.id===o.id);if(i>=0)t.expenses[i]=o;else t.expenses.push(o);
+  $('dExp').close();render();syncSet(t.id,{['expenses.'+o.id]:clean(o)});
+}
+function delExp(btn){arm(btn,()=>{const t=trip(),id=editExp;t.expenses=(t.expenses||[]).filter(x=>x.id!==id);$('dExp').close();render();syncSet(t.id,{['expenses.'+id]:DEL()})})}
+function recHtml(i,code){const r=i.rec;if(!r)return '';
+  const rv=RV[r.revisit];
+  return ((r.rating||rv)?'<div class="rvl">'+(r.rating?'<span class="stars">'+'★'.repeat(r.rating)+'</span>':'')+(rv?'<span class="chip '+rv[2]+'">'+rv[0]+' '+rv[1]+'</span>':'')+'</div>':'')+(r.menu?'<div class="sub">🍽 '+esc(r.menu)+'</div>':'')+(r.note?'<div class="sub">'+esc(r.note)+'</div>':'')
+    +((r.photos&&r.photos.length)?'<div class="ph">'+r.photos.map(id=>'<img data-c="'+code+'" data-pid="'+id+'" onclick="zoom(this.src)">').join('')+'</div>':'');
+}
+function zoom(s){$('zimg').src=s;$('zoom').style.display='flex'}
+function openRec(id){
+  const i=trip().items.find(x=>x.id===id);if(!i)return;REC=id;const r=i.rec||{};
+  $('rT').textContent=i.name;RR=r.rating||0;RP=(r.photos||[]).slice();
+  $('rMenu').value=r.menu||'';$('rNote').value=r.note||'';RRV=r.revisit||'';paintRev();$('rMsg').textContent='';
+  $('rPhBox').style.display=(db&&trip().code)?'':'none';stars();phs();$('dRec').showModal();
+}
+function stars(){$('rStars').innerHTML=[1,2,3,4,5].map(n=>'<button style="font-size:24px;border:none;background:none;padding:2px 6px;color:'+(n<=RR?'var(--accent)':'var(--sub)')+'" onclick="RR=RR==='+n+'?0:'+n+';stars()">'+(n<=RR?'★':'☆')+'</button>').join('')}
+function phs(){$('rPh').innerHTML=RP.map((id,k)=>'<div style="position:relative;flex:none"><img data-c="'+trip().id+'" data-pid="'+id+'"><button class="sm" style="position:absolute;top:-4px;right:-4px;padding:0 6px" onclick="RP.splice('+k+',1);phs()">×</button></div>').join('');hydrate()}
+function toData(f){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(f);
+  im.onload=()=>{const s=Math.min(1,1024/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);
+    let q=.72,d=c.toDataURL('image/jpeg',q);while(d.length>600000&&q>.3){q-=.1;d=c.toDataURL('image/jpeg',q)}
+    d.length>650000?no(new Error('too big')):ok(d)};
+  im.onerror=no;im.src=u})}
+async function addPhotos(inp){
+  const files=[...inp.files];inp.value='';const t=trip();
+  if(!db||!t||!t.code||!files.length)return;
+  $('rMsg').textContent='사진 올리는 중…';
+  try{
+    for(const f of files){
+      const id='p'+uid()+uid(),d=await toData(f);
+      await F.setDoc(F.doc(db,'trips',t.code,'photos',id),{data:d,createdAt:F.serverTimestamp()});
+      PH[t.code+'/'+id]=d;RP.push(id);
+    }
+    phs();$('rMsg').textContent='';
+  }catch(e){$('rMsg').textContent='사진을 올리지 못했어요. 다시 시도해 주세요.'}
+}
+function saveRec(){
+  const t=trip(),i=t.items.find(x=>x.id===REC);if(!i)return;
+  i.rec={rating:RR,menu:$('rMenu').value.trim(),note:$('rNote').value.trim(),revisit:RRV,photos:RP};i.done=true;
+  $('dRec').close();render();
+  syncSet(t.id,{['items.'+i.id+'.rec']:clean(i.rec),['items.'+i.id+'.done']:true});
+}
+function setView0(v){
+  const s=v==='seen';
+  ['sum','tabs','list'].forEach(id=>$(id).style.display=s?'none':'');
+  $('fab').style.display=s?'none':'';$('seen').style.display=s?'':'none';
+  $('vPlan').classList.toggle('on',!s);$('vSeen').classList.toggle('on',s);if(s)renderSeen();
+}
+function renderSeen(){
+  const q=$('seenQ').value.trim().toLowerCase(),rows=[];
+  S.trips.forEach(t=>t.items.forEach(i=>{if(i.done||i.rec)rows.push([t,i])}));
+  const f=rows.filter(([t,i])=>!q||(i.name+' '+((i.rec&&i.rec.menu)||'')+' '+((i.rec&&i.rec.note)||'')).toLowerCase().includes(q));
+  $('seenList').innerHTML=f.length?f.map(([t,i])=>'<li class="it"><div style="flex:1;min-width:0"><div class="nm">'+(CATS[i.cat]||CATS.etc)[0]+' '+esc(i.name)+'</div><div class="sub">'+esc(t.name)+' · '+dlabel(i.day)+'</div>'+recHtml(i,t.id)+'</div></li>').join(''):'<div class="empty">'+(q?'기록에 없는 곳이에요.<br>아직 안 가본 곳일 수 있어요.':'아직 가본 곳 기록이 없어요.<br>일정에서 "다녀옴"을 체크하거나 후기를 남겨 보세요.')+'</div>';
+hydrate();
+}
+layout();initDb();
+function soloToggle(){const c=$('iCat').value;$('soloBox').style.display=(c==='food'||c==='cafe')?'':'none'}
+function soloTags(i){const o=[];
+  if(i.solo)o.push(i.solo==='ok'?['혼자 입장 가능','good']:i.solo==='limit'?['혼자 입장 시간대 제한','warn']:['혼자 입장 불가','warn']);
+  if(i.seat)o.push([{bar:'바·카운터석',single:'1인석',table:'테이블석'}[i.seat],'']);
+  if(i.menu)o.push([i.menu==='yes'?'1인 메뉴 있음':'1인 메뉴 없음',i.menu==='yes'?'good':'']);
+  return o.length?'<div>'+o.map(x=>'<span class="tag '+x[1]+'">'+x[0]+'</span>').join('')+'</div>':''}
+function delItem(btn){arm(btn,()=>{const t=trip(),iid=editItem;t.items=t.items.filter(x=>x.id!==iid);$('dItem').close();render();syncSet(t.id,{['items.'+iid]:DEL()})})}
+
+function openTrip(id){
+  const t=id?S.trips.find(x=>x.id===id):null;editTrip=t?t.id:null;
+  $('dTripT').textContent=t?'여행 수정':'새 여행 등록';
+  $('tName').value=t?t.name:'';$('tDest').value=t?t.dest:'';setType((t&&t.type)||'overseas');
+  $('tStart').value=t?t.start:'';$('tEnd').value=t?t.end:'';
+  $('tDel').style.display=t?'':'none';resetDel($('tDel'),'목록에서 제거');
+  $('dTrip').showModal();
+}
+async function saveTrip(){
+  const v={name:$('tName').value.trim(),dest:$('tDest').value.trim(),start:$('tStart').value,end:$('tEnd').value,type:TT};
+  if(!v.name||!v.start||!v.end||v.start>v.end){alert('이름과 날짜(시작일 ≤ 종료일)를 확인해 주세요.');return}
+  if(editTrip){
+    const id=editTrip;Object.assign(S.trips.find(x=>x.id===id),v);syncSet(id,v);
+  }else{
+    await READY;
+    const code=db?newCode():'';
+    const n=Object.assign({id:code||('l'+uid()),code,items:[],expenses:[]},v);
+    S.trips.push(n);S.cur=n.id;
+    if(code){
+      subscribe(code);
+      F.setDoc(F.doc(db,'trips',code),Object.assign({},v,{items:{},expenses:{},createdAt:F.serverTimestamp()}))
+        .catch(e=>setSync('여행 만들기 실패: '+(e.code||e.message)));
+    }
+  }
+  S.day='';$('dTrip').close();render();
+}
+function delTrip(btn){arm(btn,()=>{
+  const id=editTrip;if(UNSUB[id]){UNSUB[id]();delete UNSUB[id]}
+  S.trips=S.trips.filter(x=>x.id!==id);S.cur=S.trips[0]?S.trips[0].id:'';SCR='home';layout();$('dTrip').close();render();
+},'정말 제거')}
+render();
+</script>
+</body>
+</html>
